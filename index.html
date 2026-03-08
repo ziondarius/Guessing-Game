@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Software</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #0f766e;
+      --primary-hover: #115e59;
+      --border: #d1d5db;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(180deg, #eaf2ff 0%, var(--bg) 100%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .quiz {
+      width: 100%;
+      max-width: 620px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 1.6rem;
+    }
+
+    .progress {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .question {
+      font-size: 1.25rem;
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+
+    .answer {
+      margin: 0 0 20px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #f0fdf9;
+      border: 1px solid #99f6e4;
+      display: none;
+      font-weight: 600;
+    }
+
+    .answer.visible {
+      display: block;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .primary:hover:enabled {
+      background: var(--primary-hover);
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: var(--text);
+    }
+
+    .secondary:hover:enabled {
+      background: #d1d5db;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <main class="quiz">
+    <h1>Quiz Software</h1>
+    <p class="progress" id="progress"></p>
+    <p class="question" id="question"></p>
+    <p class="answer" id="answer"></p>
+
+    <div class="actions">
+      <button class="primary" id="revealBtn">Reveal Answer</button>
+      <button class="secondary" id="nextBtn" disabled>Next Question</button>
+      <button class="secondary" id="restartBtn" style="display:none;">Restart</button>
+    </div>
+  </main>
+
+  <script>
+    const questions = [
+      { q: "What comes after 1?", a: "2" },
+      { q: "What part of speech is \"me\"?", a: "pron." },
+      { q: "What famous tower is in Paris?", a: "Eiffel Tower" },
+      { q: "What fruit do you get from an orange tree?", a: "Orange" }
+    ];
+
+    const progressEl = document.getElementById("progress");
+    const questionEl = document.getElementById("question");
+    const answerEl = document.getElementById("answer");
+    const revealBtn = document.getElementById("revealBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+
+    let order = [];
+    let index = 0;
+    let finished = false;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startGame() {
+      order = shuffle([...questions]);
+      index = 0;
+      finished = false;
+      restartBtn.style.display = "none";
+      revealBtn.style.display = "inline-block";
+      nextBtn.style.display = "inline-block";
+      renderCurrent();
+    }
+
+    function renderCurrent() {
+      const current = order[index];
+      progressEl.textContent = `Question ${index + 1} of ${order.length}`;
+      questionEl.textContent = current.q;
+      answerEl.textContent = `Answer: ${current.a}`;
+      answerEl.classList.remove("visible");
+      revealBtn.disabled = false;
+      nextBtn.disabled = true;
+    }
+
+    function revealAnswer() {
+      if (finished) {
+        return;
+      }
+      answerEl.classList.add("visible");
+      revealBtn.disabled = true;
+      nextBtn.disabled = false;
+    }
+
+    function goNext() {
+      index += 1;
+      if (index >= order.length) {
+        showEnd();
+      } else {
+        renderCurrent();
+      }
+    }
+
+    function showEnd() {
+      finished = true;
+      progressEl.textContent = "Completed";
+      questionEl.textContent = "Game over. Every question has been used once.";
+      answerEl.classList.remove("visible");
+      answerEl.textContent = "";
+      revealBtn.style.display = "none";
+      nextBtn.style.display = "none";
+      restartBtn.style.display = "inline-block";
+    }
+
+    revealBtn.addEventListener("click", revealAnswer);
+    nextBtn.addEventListener("click", goNext);
+    restartBtn.addEventListener("click", startGame);
+
+    startGame();
+  </script>
+</body>
+</html>
